@@ -3,7 +3,7 @@ const path=require('path');
 const express=require('express');
 const app=express();
 
-const db=require('./util/database');
+const sequelize=require('./util/database');
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -29,4 +29,9 @@ app.use(contactRoutes);
 
 app.use('/' ,errorController.errorPage);
 
-app.listen(3000);
+sequelize.sync()
+.then(result => {
+    console.log('app started');
+    app.listen(3000);
+})
+.catch(err=>console.log(err));
