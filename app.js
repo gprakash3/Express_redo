@@ -21,6 +21,23 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const contactRoutes= require('./routes/contactus');
 
+const Product = require('./models/product');
+const User = require('./models/user');
+
+//User created product
+User.hasMany(Product, {constrain:true, onDelete:'CASCADE'});
+Product.belongsTo(User);
+
+
+app.use((req,res,next) => {
+    User.findOne()
+    .then(user => {
+        console.log(user);
+        req.user = user;
+        next();
+    })
+    .catch(err => console.log(err));
+})
 
 
 app.use('/admin', adminRoutes);
@@ -31,7 +48,18 @@ app.use('/' ,errorController.errorPage);
 
 sequelize.sync()
 .then(result => {
+    return User.findOne();
+})
+.then(user => {
+    if(!user){
+       return User.create({name:'testname' , email:'test@email.com'})
+    }
+    // return Promise.resolve(user);           
+    return user;
+})
+.then(user => {
     console.log('app started');
     app.listen(3000);
-})
+})   
+    
 .catch(err=>console.log(err));
